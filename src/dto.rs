@@ -1,20 +1,25 @@
-use rocket::{response::Responder, serde::Serialize};
+use rocket::{
+    response::Responder,
+    serde::{Deserialize, Serialize},
+};
 
 #[derive(Debug, Clone, Serialize)]
-#[serde(crate = "rocket::serde")]
 pub struct UploadResp {
-    pub url: String,
+    pub slug: String,
     pub delete_token: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
-#[serde(crate = "rocket::serde")]
 pub struct DeleteSucceededResp {
     pub deleted_slug: String,
 }
 
 #[derive(Debug, Clone, Serialize, Responder)]
-#[serde(crate = "rocket::serde")]
 pub struct Error {
     pub error: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct UploadReq<'a> {
+    pub content: &'a str,
 }

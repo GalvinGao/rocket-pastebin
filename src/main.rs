@@ -44,24 +44,23 @@ async fn index() -> Option<fs::NamedFile> {
 }
 
 #[post("/", data = "<paste>")]
-async fn upload(paste: Data<'_>, db: DBPool) -> Json<dto::UploadResp> {
+async fn upload<'r>(paste: Json<dto::UploadReq<'_>>, db: DBPool) -> Json<dto::UploadResp> {
     let id = PasteId::new(8);
-    let limit: ByteUnit = (5 as i32).mebibytes();
-    let paste_content = paste.open(limit).into_string().await.unwrap();
+    let paste_content = paste.content.to_string();
 
     let str_id: String = id.0.into();
     let str_id2 = str_id.clone();
-    let url = uri!(HOST, retrieve(str_id)).to_string();
+    let slug = str_id.to_string();
 
     let delete_token: String = PasteId::new(32).0.into();
     let delete_token2 = delete_token.clone();
 
-    db.run(|conn| dao::insert_pastes(str_id2, paste_content.value, delete_token, conn))
+    db.run(|conn| dao::insert_pastes(str_id2, paste_content, delete_token, conn))
         .await
         .unwrap();
 
     Json(dto::UploadResp {
-        url,
+        slug,
         delete_token: delete_token2,
     })
 }
@@ -109,7 +108,12 @@ async fn delete_entries(
 
 #[launch]
 fn rocket() -> _ {
+    let cors = rocket_cors::CorsOptions::default()
+        .to_cors()
+        .expect("rocket_cors should initialize properly");
+
     rocket::build()
         .mount("/", routes![index, retrieve, upload, delete_entries])
         .attach(DBPool::fairing())
+        .attach(cors)
 }

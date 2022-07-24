@@ -1,8 +1,7 @@
 use chrono::NaiveDateTime;
 use diesel::Queryable;
-use serde::Serialize;
 
-#[derive(Debug, Clone, Queryable, Serialize)]
+#[derive(Debug, Clone, Queryable)]
 pub struct Paste {
     pub id: i32,
     pub slug: String,

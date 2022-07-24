@@ -10,6 +10,8 @@
   "dependencies": {
     "@uiw/codemirror-theme-dracula": "^4.11.4",
     "@uiw/react-codemirror": "^4.11.4",
+    "camelcase-keys": "^8.0.1",
+    "clsx": "^1.2.1",
     "preact": "^10.5.15",
     "vite-plugin-singlefile": "^0.11.0"
   },
