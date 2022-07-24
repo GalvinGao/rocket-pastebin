@@ -1,0 +1,2 @@
+[global.databases]
+pastebin_db = { url = "postgres://root:root@localhost:5432/pastebin" }
