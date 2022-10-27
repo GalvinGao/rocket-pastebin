@@ -70,15 +70,17 @@ async fn retrieve<'r>(id: String, db: DBPool) -> Option<String> {
         .map(|v| v.content)
 }
 
-#[delete("/<id>?<token>")]
+#[delete("/<id>", data = "<req>")]
 async fn delete_entries(
     id: String,
-    token: String,
+    req: Json<dto::DeleteReq<'_>>,
     db: DBPool,
 ) -> Result<Accepted<Json<dto::DeleteSucceededResp>>, BadRequest<Json<dto::Error>>> {
     let copied_id = id.clone();
     let copied_id2 = id.clone();
     let paste = db.run(|conn| dao::get_paste(id, conn)).await;
+
+    let token = req.token;
 
     if let Some(p) = paste {
         if constant_time_eq(p.delete_token.as_bytes(), token.as_bytes()) {

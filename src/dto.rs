@@ -22,6 +22,12 @@ pub struct Error {
 
 #[derive(Debug, Clone, Deserialize, Validate)]
 pub struct UploadReq<'a> {
-    #[validate(length(min = 1))]
+    #[validate(length(min = 1, max = 1024))]
     pub content: &'a str,
+}
+
+#[derive(Debug, Clone, Deserialize, Validate)]
+pub struct DeleteReq<'a> {
+    #[validate(length(min = 1, max = 1024))]
+    pub token: &'a str,
 }
