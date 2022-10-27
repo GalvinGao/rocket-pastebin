@@ -1,5 +1,4 @@
 use rocket::{
-    form::validate,
     response::Responder,
     serde::{Deserialize, Serialize},
 };

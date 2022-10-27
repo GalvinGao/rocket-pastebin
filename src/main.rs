@@ -8,6 +8,7 @@ mod dto;
 mod models;
 mod paste_id;
 
+use constant_time_eq::constant_time_eq;
 use diesel::prelude::*;
 use paste_id::PasteId;
 use rocket::{
@@ -78,7 +79,7 @@ async fn delete_entries(
     let paste = db.run(|conn| dao::get_pastes(id, conn)).await;
 
     if let Some(p) = paste {
-        if p.delete_token == token {
+        if constant_time_eq(p.delete_token.as_bytes(), token.as_bytes()) {
             // token succeeded
             db.run(|conn| dao::delete_paste(copied_id, conn))
                 .await

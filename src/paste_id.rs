@@ -1,5 +1,4 @@
 use std::borrow::Cow;
-use std::path::{Path, PathBuf};
 
 use rand::{self, Rng};
 
@@ -23,10 +22,4 @@ impl PasteId<'_> {
 
         PasteId(Cow::Owned(id))
     }
-
-    // Returns the path to the paste in `upload/` corresponding to this ID.
-    // pub fn file_path(&self) -> PathBuf {
-    //     let root = concat!(env!("CARGO_MANIFEST_DIR"), "/", "upload");
-    //     Path::new(root).join(self.0.as_ref())
-    // }
 }
