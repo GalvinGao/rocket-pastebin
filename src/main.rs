@@ -7,7 +7,9 @@ mod dao;
 mod dto;
 mod models;
 mod paste_id;
+mod respond;
 
+use crate::models::Paste;
 use constant_time_eq::constant_time_eq;
 use diesel::prelude::*;
 use paste_id::PasteId;
@@ -63,7 +65,7 @@ async fn upload<'r>(paste: Json<dto::UploadReq<'_>>, db: DBPool) -> Json<dto::Up
 
 #[get("/<id>")]
 async fn retrieve<'r>(id: String, db: DBPool) -> Option<String> {
-    db.run(|conn| dao::get_pastes(id, conn))
+    db.run(|conn| dao::get_paste(id, conn))
         .await
         .map(|v| v.content)
 }
@@ -76,7 +78,7 @@ async fn delete_entries(
 ) -> Result<Accepted<Json<dto::DeleteSucceededResp>>, BadRequest<Json<dto::Error>>> {
     let copied_id = id.clone();
     let copied_id2 = id.clone();
-    let paste = db.run(|conn| dao::get_pastes(id, conn)).await;
+    let paste = db.run(|conn| dao::get_paste(id, conn)).await;
 
     if let Some(p) = paste {
         if constant_time_eq(p.delete_token.as_bytes(), token.as_bytes()) {
@@ -104,6 +106,16 @@ async fn delete_entries(
     }))))
 }
 
+#[get("/_/pastes")]
+async fn list_entries(db: DBPool) -> Result<Json<Vec<Paste>>, respond::Error<&'static str>> {
+    let pastes = db.run(|conn| dao::get_pastes(conn)).await;
+
+    match pastes {
+        Ok(v) => Ok(Json(v)),
+        Err(e) => Err(respond::Error::Unexpected("unable to get pastes: ")),
+    }
+}
+
 #[launch]
 fn rocket() -> _ {
     let cors = rocket_cors::CorsOptions::default()
@@ -111,7 +123,10 @@ fn rocket() -> _ {
         .expect("rocket_cors should initialize properly");
 
     rocket::build()
-        .mount("/", routes![index, retrieve, upload, delete_entries])
+        .mount(
+            "/",
+            routes![index, retrieve, upload, delete_entries, list_entries],
+        )
         .attach(DBPool::fairing())
         .attach(cors)
 }

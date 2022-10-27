@@ -1,15 +1,22 @@
+use crate::models::Paste;
+use diesel;
 use diesel::delete;
 use diesel::insert_into;
 use diesel::prelude::*;
-use diesel::result::Error;
 use diesel::PgConnection;
-use rocket_todomvc::{models::Paste, schema::pastes::dsl};
+use rocket_todomvc::schema::pastes::dsl;
 
-pub fn get_pastes(id: String, conn: &PgConnection) -> Option<Paste> {
+pub fn get_paste(id: String, conn: &PgConnection) -> Option<Paste> {
     dsl::pastes
         .filter(dsl::slug.eq(id))
         .first::<Paste>(conn)
         .ok()
+}
+
+pub fn get_pastes(conn: &PgConnection) -> Result<Vec<Paste>, diesel::result::Error> {
+    dsl::pastes
+        .filter(dsl::deleted_at.is_null())
+        .load::<Paste>(conn)
 }
 
 pub fn insert_pastes(
@@ -28,7 +35,7 @@ pub fn insert_pastes(
         .ok()
 }
 
-pub fn delete_paste(id: String, conn: &PgConnection) -> Result<(), Error> {
+pub fn delete_paste(id: String, conn: &PgConnection) -> Result<(), diesel::result::Error> {
     delete(dsl::pastes)
         .filter(dsl::slug.eq(id))
         .execute(conn)
