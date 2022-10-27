@@ -11,19 +11,14 @@ mod paste_id;
 use diesel::prelude::*;
 use paste_id::PasteId;
 use rocket::{
-    data::{ByteUnit, ToByteUnit},
     fs,
-    http::uri::Absolute,
     response::status::{Accepted, BadRequest},
     serde::json::Json,
-    Data,
 };
 use rocket_sync_db_pools::database;
 
 #[cfg(test)]
 mod tests;
-
-const HOST: Absolute<'static> = uri!("http://localhost:8000");
 
 #[database("pastebin_db")]
 pub struct DBPool(PgConnection);
@@ -77,7 +72,7 @@ async fn delete_entries(
     id: String,
     token: String,
     db: DBPool,
-) -> Option<Result<Accepted<Json<dto::DeleteSucceededResp>>, BadRequest<Json<dto::Error>>>> {
+) -> Result<Accepted<Json<dto::DeleteSucceededResp>>, BadRequest<Json<dto::Error>>> {
     let copied_id = id.clone();
     let copied_id2 = id.clone();
     let paste = db.run(|conn| dao::get_pastes(id, conn)).await;
@@ -89,21 +84,23 @@ async fn delete_entries(
                 .await
                 .unwrap();
 
-            return Some(Ok(Accepted(
+            return Ok(Accepted(
                 Json(dto::DeleteSucceededResp {
                     deleted_slug: copied_id2,
                 })
                 .into(),
-            )));
+            ));
         } else {
             // token invalid
-            return Some(Err(BadRequest(Some(Json(dto::Error {
+            return Err(BadRequest(Some(Json(dto::Error {
                 error: "token provided is invalid for this paste".into(),
-            })))));
+            }))));
         }
     }
 
-    None
+    Err(BadRequest(Some(Json(dto::Error {
+        error: "paste not found".into(),
+    }))))
 }
 
 #[launch]

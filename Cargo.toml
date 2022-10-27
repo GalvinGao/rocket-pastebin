@@ -15,7 +15,8 @@ chrono = { version = "0.4.19", features = ["serde"]}
 tracing = "0.1"
 tracing-subscriber = "0.3"
 rocket_cors = { git = "https://github.com/lawliet89/rocket_cors.git", rev = "54fae070"  }
-
+rocket-validation = "0.1.0"
+validator = "0.16.0"
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.2"

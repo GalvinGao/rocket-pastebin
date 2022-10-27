@@ -1,7 +1,9 @@
 use rocket::{
+    form::validate,
     response::Responder,
     serde::{Deserialize, Serialize},
 };
+use rocket_validation::Validate;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct UploadResp {
@@ -19,7 +21,8 @@ pub struct Error {
     pub error: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 pub struct UploadReq<'a> {
+    #[validate(length(min = 1))]
     pub content: &'a str,
 }

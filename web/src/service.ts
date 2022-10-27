@@ -1,8 +1,6 @@
 import camelcaseKeys from "camelcase-keys";
 
-const BASE_URL = "http://localhost:8000";
-
-export const constructUrl = (path: string) => new URL(path, BASE_URL);
+export const constructUrl = (path: string) => path;
 
 const service = <T>(
   input: RequestInfo | URL,
